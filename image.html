@@ -30,33 +30,20 @@ img{
 
 <script>
 
-// ----------------------
-// CONFIG
-// ----------------------
-
 const tasks = ["Workout","Study","Reading","Test","Mock Interview"];
 const colors = ["#FFD84D","#FF3B30","#FF9F0A","#32D2F0","#2BD67B"];
 const state = JSON.parse(localStorage.getItem("state")) || {};
 
-// iPhone 13 Pro resolution
 const canvas = document.getElementById("c");
 canvas.width = 1170;
 canvas.height = 2532;
 const ctx = canvas.getContext("2d");
 
-// ----------------------
-// BACKGROUND
-// ----------------------
-
+// Background
 ctx.fillStyle = "black";
 ctx.fillRect(0,0,canvas.width,canvas.height);
 
-// Space for clock
 let y = 520;
-
-// ----------------------
-// LOAD IMAGES
-// ----------------------
 
 function load(src){
   return new Promise(res=>{
@@ -77,53 +64,58 @@ Promise.all([
 
     if(state[task]) done++;
 
-    // ---- PERFECT CIRCLE ----
     const cx = 200;
     const cy = y + 80;
     const r = 80;
 
+    // Outer circle
     ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.arc(cx,cy,r,0,Math.PI*2);
     ctx.fillStyle = colors[i];
     ctx.fill();
 
-    // ---- CHECKMARK CENTERED ----
+    // Inner highlight ring
+    ctx.beginPath();
+    ctx.arc(cx,cy,r-6,0,Math.PI*2);
+    ctx.strokeStyle = "rgba(255,255,255,0.25)";
+    ctx.lineWidth = 6;
+    ctx.stroke();
+
+    // Subtle shadow
+    ctx.beginPath();
+    ctx.arc(cx,cy,r-10,0,Math.PI*2);
+    ctx.strokeStyle = "rgba(0,0,0,0.25)";
+    ctx.lineWidth = 8;
+    ctx.stroke();
+
+    // Checkmark
     if(state[task]){
-      const size = 90;
-      ctx.drawImage(
-        check,
-        cx - size/2,
-        cy - size/2,
-        size,
-        size
-      );
+      const size = 110;
+      ctx.drawImage(check,cx-size/2,cy-size/2,size,size);
     }
 
-    // ---- TEXT ----
+    // Text
     ctx.fillStyle="white";
     ctx.font="900 100px FuturaCustom, Arial";
-    ctx.textAlign="left";
-    ctx.fillText(task,360,y+110);
+    ctx.fillText(task,360,y+115);
 
     y += 220;
   });
 
-  // ---- PROGRESS ----
+  // Progress
   ctx.textAlign="center";
-  ctx.fillStyle="white";
   ctx.font="900 70px FuturaCustom, Arial";
   ctx.fillText(`${done}/5 Completed`,canvas.width/2,y+120);
 
-  // ---- DINO ----
+  // Dino (bigger + higher)
   ctx.drawImage(
     dino,
-    canvas.width/2-260,
-    canvas.height-520,
-    520,
-    380
+    canvas.width/2-300,
+    canvas.height-600,
+    600,
+    420
   );
 
-  // ---- OUTPUT IMAGE ----
   const img=document.createElement("img");
   img.src = canvas.toDataURL("image/png");
   document.body.innerHTML="";
