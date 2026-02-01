@@ -6,6 +6,11 @@
 <title>Wallpaper</title>
 
 <style>
+@font-face{
+  font-family:"FuturaCustom";
+  src:url("assets/futura.ttf");
+}
+
 body{
   margin:0;
   background:black;
@@ -23,58 +28,80 @@ img{
 <canvas id="c"></canvas>
 
 <script>
+// TASKS
 const tasks=["Workout","Study","Reading","Test","Mock Interview"];
+const colors=["yellow","red","orange","blue","green"];
 const state = JSON.parse(localStorage.getItem("state")) || {};
 
 const canvas=document.getElementById("c");
 canvas.width=1170;
 canvas.height=2532;
-
 const ctx=canvas.getContext("2d");
 
-ctx.fillStyle="#0b0b0b";
+// BACKGROUND
+ctx.fillStyle="black";
 ctx.fillRect(0,0,canvas.width,canvas.height);
 
-// Title
-ctx.fillStyle="white";
-ctx.font="bold 90px system-ui";
-ctx.textAlign="center";
-ctx.fillText("TODAY", canvas.width/2, 220);
+// SAFE SPACE FOR CLOCK
+let y=420;
 
-ctx.font="60px system-ui";
-ctx.fillText("NON-NEGOTIABLES", canvas.width/2, 300);
+// LOAD ASSETS
+function load(src){
+  return new Promise(r=>{
+    const i=new Image();
+    i.src=src;
+    i.onload=()=>r(i);
+  });
+}
 
-// Tasks
-let y=520;
-let doneCount=0;
+Promise.all([
+  load("assets/check.png"),
+  load("assets/dino.png"),
+  load("assets/yellow.png"),
+  load("assets/red.png"),
+  load("assets/orange.png"),
+  load("assets/blue.png"),
+  load("assets/green.png")
+]).then(([check,dino,yel,red,org,blu,grn])=>{
 
-tasks.forEach(t=>{
-  const done = state[t];
-  if(done) doneCount++;
+  const circles=[yel,red,org,blu,grn];
+  let done=0;
 
-  ctx.fillStyle = done ? "#22c55e" : "#2a2a2a";
-  ctx.fillRect(120,y,930,140);
+  tasks.forEach((t,i)=>{
+    if(state[t]) done++;
 
-  ctx.fillStyle = done ? "#0b0b0b" : "white";
-  ctx.font="bold 56px system-ui";
-  ctx.textAlign="left";
-  ctx.fillText(t,160,y+92);
+    // Circle
+    ctx.drawImage(circles[i],120,y,120,120);
 
-  y+=180;
+    // Check if done
+    if(state[t]){
+      ctx.drawImage(check,140,y+22,80,80);
+    }
+
+    // Text
+    ctx.fillStyle="white";
+    ctx.font="bold 90px FuturaCustom";
+    ctx.textAlign="left";
+    ctx.fillText(t,280,y+95);
+
+    y+=200;
+  });
+
+  // PROGRESS
+  ctx.textAlign="center";
+  ctx.fillStyle="white";
+  ctx.font="bold 70px FuturaCustom";
+  ctx.fillText(`${done}/${tasks.length} Completed`,canvas.width/2,y+120);
+
+  // DINO
+  ctx.drawImage(dino,canvas.width/2-200,canvas.height-420,400,300);
+
+  // OUTPUT
+  const img=document.createElement("img");
+  img.src=canvas.toDataURL("image/png");
+  document.body.innerHTML="";
+  document.body.appendChild(img);
 });
-
-// Progress
-ctx.textAlign="center";
-ctx.fillStyle="white";
-ctx.font="bold 70px system-ui";
-ctx.fillText(`${doneCount} / ${tasks.length} Completed`, canvas.width/2, y+120);
-
-// Convert canvas to image
-const img = document.createElement("img");
-img.src = canvas.toDataURL("image/png");
-
-document.body.innerHTML="";
-document.body.appendChild(img);
 </script>
 
 </body>
