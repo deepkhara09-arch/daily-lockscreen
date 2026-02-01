@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wallpaper</title>
+
+<style>
+body{
+  margin:0;
+  background:black;
+}
+canvas{
+  display:block;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="c"></canvas>
+
+<script>
+const tasks=["Workout","Study","Reading","Test","Mock Interview"];
+const state = JSON.parse(localStorage.getItem("state")) || {};
+
+const canvas=document.getElementById("c");
+canvas.width=1170;
+canvas.height=2532;
+
+const ctx=canvas.getContext("2d");
+
+ctx.fillStyle="#0b0b0b";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+// Title
+ctx.fillStyle="white";
+ctx.font="bold 90px system-ui";
+ctx.textAlign="center";
+ctx.fillText("TODAY", canvas.width/2, 220);
+
+ctx.font="60px system-ui";
+ctx.fillText("NON-NEGOTIABLES", canvas.width/2, 300);
+
+// Tasks
+let y=520;
+let doneCount=0;
+
+tasks.forEach(t=>{
+  const done = state[t];
+  if(done) doneCount++;
+
+  ctx.fillStyle = done ? "#22c55e" : "#2a2a2a";
+  ctx.fillRect(120,y,930,140);
+
+  ctx.fillStyle = done ? "#0b0b0b" : "white";
+  ctx.font="bold 56px system-ui";
+  ctx.textAlign="left";
+  ctx.fillText(t,160,y+92);
+
+  y+=180;
+});
+
+// Progress
+ctx.textAlign="center";
+ctx.fillStyle="white";
+ctx.font="bold 70px system-ui";
+ctx.fillText(`${doneCount} / ${tasks.length} Completed`, canvas.width/2, y+120);
+
+// Output image
+document.body.innerHTML = canvas.toDataURL("image/png");
+</script>
+
+</body>
+</html>
