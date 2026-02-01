@@ -71,16 +71,16 @@ Promise.all([
     if(state[t]) done++;
 
     // Circle
-    ctx.drawImage(circles[i],120,y,120,120);
+    ctx.drawImage(circles[i],120,y,140,140);
 
     // Check if done
     if(state[t]){
-      ctx.drawImage(check,140,y+22,80,80);
+      ctx.drawImage(check,155,y+35,70,70);
     }
 
     // Text
     ctx.fillStyle="white";
-    ctx.font="bold 90px FuturaCustom";
+    ctx.font="bold 100px FuturaCustom";
     ctx.textAlign="left";
     ctx.fillText(t,280,y+95);
 
@@ -106,4 +106,5 @@ Promise.all([
 
 </body>
 </html>
+
 
