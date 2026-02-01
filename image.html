@@ -15,6 +15,7 @@ body{
   margin:0;
   background:black;
 }
+
 img{
   width:100vw;
   height:100vh;
@@ -28,83 +29,230 @@ img{
 <canvas id="c"></canvas>
 
 <script>
-// TASKS
-const tasks=["Workout","Study","Reading","Test","Mock Interview"];
-const colors=["yellow","red","orange","blue","green"];
+
+// ----------------------
+// CONFIG
+// ----------------------
+
+const tasks = ["Workout","Study","Reading","Test","Mock Interview"];
+const colors = ["yellow","red","orange","blue","green"];
 const state = JSON.parse(localStorage.getItem("state")) || {};
 
-const canvas=document.getElementById("c");
-canvas.width=1170;
-canvas.height=2532;
-const ctx=canvas.getContext("2d");
+// iPhone 13 Pro resolution
+const canvas = document.getElementById("c");
+canvas.width = 1170;
+canvas.height = 2532;
+const ctx = canvas.getContext("2d");
 
+// ----------------------
 // BACKGROUND
-ctx.fillStyle="black";
+// ----------------------
+
+ctx.fillStyle = "black";
 ctx.fillRect(0,0,canvas.width,canvas.height);
 
-// SAFE SPACE FOR CLOCK
-let y=420;
+// Leave space for iOS clock
+let y = 520;
 
-// LOAD ASSETS
+// ----------------------
+// IMAGE LOADER
+// ----------------------
+
 function load(src){
-  return new Promise(r=>{
-    const i=new Image();
-    i.src=src;
-    i.onload=()=>r(i);
+  return new Promise(res=>{
+    const img = new Image();
+    img.src = src;
+    img.onload = () => res(img);
   });
 }
 
 Promise.all([
-  load("assets/check.png"),
-  load("assets/dino.png"),
-  load("assets/yellow.png"),
-  load("assets/red.png"),
-  load("assets/orange.png"),
-  load("assets/blue.png"),
-  load("assets/green.png")
+  load("/assets/check.png"),
+  load("/assets/dino.png"),
+  load("/assets/yellow.png"),
+  load("/assets/red.png"),
+  load("/assets/orange.png"),
+  load("/assets/blue.png"),
+  load("/assets/green.png")
 ]).then(([check,dino,yel,red,org,blu,grn])=>{
 
   const circles=[yel,red,org,blu,grn];
   let done=0;
 
-  tasks.forEach((t,i)=>{
-    if(state[t]) done++;
+  tasks.forEach((task,i)=>{
+
+    if(state[task]) done++;
 
     // Circle
-    ctx.drawImage(circles[i],120,y,140,140);
+    ctx.drawImage(circles[i],120,y,160,160);
 
-    // Check if done
-    if(state[t]){
-      ctx.drawImage(check,155,y+35,70,70);
+    // Checkmark
+    if(state[task]){
+      ctx.drawImage(check,145,y+40,90,90);
     }
 
     // Text
     ctx.fillStyle="white";
-    ctx.font="bold 100px FuturaCustom";
+    ctx.font="900 100px FuturaCustom, Arial";
     ctx.textAlign="left";
-    ctx.fillText(t,280,y+95);
+    ctx.fillText(task,320,y+110);
 
-    y+=200;
+    y += 220;
   });
 
-  // PROGRESS
+  // Progress
   ctx.textAlign="center";
   ctx.fillStyle="white";
-  ctx.font="bold 70px FuturaCustom";
-  ctx.fillText(`${done}/${tasks.length} Completed`,canvas.width/2,y+120);
+  ctx.font="900 70px FuturaCustom, Arial";
+  ctx.fillText(`${done}/5 Completed`,canvas.width/2,y+120);
 
-  // DINO
-  ctx.drawImage(dino,canvas.width/2-200,canvas.height-420,400,300);
+  // Dino
+  ctx.drawImage(
+    dino,
+    canvas.width/2-260,
+    canvas.height-520,
+    520,
+    380
+  );
 
-  // OUTPUT
+  // Output image
   const img=document.createElement("img");
-  img.src=canvas.toDataURL("image/png");
+  img.src = canvas.toDataURL("image/png");
   document.body.innerHTML="";
   document.body.appendChild(img);
+
 });
+
 </script>
 
 </body>
 </html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wallpaper</title>
 
+<style>
+@font-face{
+  font-family:"FuturaCustom";
+  src:url("/assets/futura.ttf");
+}
 
+body{
+  margin:0;
+  background:black;
+}
+
+img{
+  width:100vw;
+  height:100vh;
+  object-fit:cover;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="c"></canvas>
+
+<script>
+
+// ----------------------
+// CONFIG
+// ----------------------
+
+const tasks = ["Workout","Study","Reading","Test","Mock Interview"];
+const colors = ["yellow","red","orange","blue","green"];
+const state = JSON.parse(localStorage.getItem("state")) || {};
+
+// iPhone 13 Pro resolution
+const canvas = document.getElementById("c");
+canvas.width = 1170;
+canvas.height = 2532;
+const ctx = canvas.getContext("2d");
+
+// ----------------------
+// BACKGROUND
+// ----------------------
+
+ctx.fillStyle = "black";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+// Leave space for iOS clock
+let y = 520;
+
+// ----------------------
+// IMAGE LOADER
+// ----------------------
+
+function load(src){
+  return new Promise(res=>{
+    const img = new Image();
+    img.src = src;
+    img.onload = () => res(img);
+  });
+}
+
+Promise.all([
+  load("/assets/check.png"),
+  load("/assets/dino.png"),
+  load("/assets/yellow.png"),
+  load("/assets/red.png"),
+  load("/assets/orange.png"),
+  load("/assets/blue.png"),
+  load("/assets/green.png")
+]).then(([check,dino,yel,red,org,blu,grn])=>{
+
+  const circles=[yel,red,org,blu,grn];
+  let done=0;
+
+  tasks.forEach((task,i)=>{
+
+    if(state[task]) done++;
+
+    // Circle
+    ctx.drawImage(circles[i],120,y,160,160);
+
+    // Checkmark
+    if(state[task]){
+      ctx.drawImage(check,145,y+40,90,90);
+    }
+
+    // Text
+    ctx.fillStyle="white";
+    ctx.font="900 100px FuturaCustom, Arial";
+    ctx.textAlign="left";
+    ctx.fillText(task,320,y+110);
+
+    y += 220;
+  });
+
+  // Progress
+  ctx.textAlign="center";
+  ctx.fillStyle="white";
+  ctx.font="900 70px FuturaCustom, Arial";
+  ctx.fillText(`${done}/5 Completed`,canvas.width/2,y+120);
+
+  // Dino
+  ctx.drawImage(
+    dino,
+    canvas.width/2-260,
+    canvas.height-520,
+    520,
+    380
+  );
+
+  // Output image
+  const img=document.createElement("img");
+  img.src = canvas.toDataURL("image/png");
+  document.body.innerHTML="";
+  document.body.appendChild(img);
+
+});
+
+</script>
+
+</body>
+</html>
