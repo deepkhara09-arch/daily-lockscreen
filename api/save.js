@@ -2,12 +2,14 @@ import fs from "fs";
 import path from "path";
 
 export default function handler(req, res) {
-  const filePath = path.join(process.cwd(), "state.json");
+  if (req.method !== "POST") {
+    return res.status(405).end();
+  }
 
-  fs.writeFileSync(
-    filePath,
-    JSON.stringify(req.body, null, 2)
-  );
+  const { file } = req.body;
 
-  res.status(200).json({ success: true });
+  const filePath = path.join(process.cwd(), "current.txt");
+  fs.writeFileSync(filePath, file);
+
+  return res.status(200).json({ ok: true });
 }
