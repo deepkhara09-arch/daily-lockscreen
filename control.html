@@ -48,14 +48,15 @@ button{
 const SUPABASE_URL = "https://vgirktwcmamfjnjbqndn.supabase.co"
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnaXJrdHdjbWFtZmpuamJxbmRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMzU0OTYsImV4cCI6MjA4NTYxMTQ5Nn0.StAPWo-nEvMnUwet8-f8BXmQZdSFn-UGVGwDHFNvlLM"
 
-const TASKS=["workout","study","reading","test","mock"]
+const TASKS = ["workout","study","reading","test","mock"]
 
-async function fetchState(){
+async function fetchState() {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/state?select=*`,
+    SUPABASE_URL + "/rest/v1/state?select=*&limit=1",
     {
-      headers:{
-        "apikey": ANON_KEY
+      headers: {
+        "apikey": ANON_KEY,
+        "Authorization": "Bearer " + ANON_KEY
       }
     }
   )
@@ -64,30 +65,27 @@ async function fetchState(){
   return data[0]
 }
 
-async function render(){
+async function render() {
   const state = await fetchState()
 
-  TASKS.forEach(t=>{
-    const btn=document.getElementById(t)
-    if(state[t]){
-      btn.className="done"
-    }else{
-      btn.className="notdone"
-    }
+  TASKS.forEach(t => {
+    const btn = document.getElementById(t)
+    btn.className = state[t] ? "done" : "notdone"
   })
 }
 
-async function toggleTask(task){
+async function toggleTask(task) {
 
   const state = await fetchState()
 
   await fetch(
-    `${SUPABASE_URL}/rest/v1/state`,
+    SUPABASE_URL + "/rest/v1/state?id=eq.1",
     {
-      method:"PATCH",
-      headers:{
+      method: "PATCH",
+      headers: {
         "apikey": ANON_KEY,
-        "Content-Type":"application/json"
+        "Authorization": "Bearer " + ANON_KEY,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         [task]: !state[task]
@@ -102,6 +100,8 @@ render()
 
 </script>
 
+
 </body>
 </html>
+
 
