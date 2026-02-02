@@ -1,36 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
 <title>Current Wallpaper</title>
+<style>
+body{
+  margin:0;
+  background:black;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+}
+img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+</style>
+</head>
+
+<body>
+
+<img id="wallpaper">
+
 <script>
 
-const order=["workout","study","reading","test","mock"];
+const ORDER = ["workout","study","reading","test","mock"]
+const params = new URLSearchParams(window.location.search)
 
-const state = JSON.parse(localStorage.getItem("dailyState")) || {
-  workout:false,
-  study:false,
-  reading:false,
-  test:false,
-  mock:false
-};
+let done = []
 
-const done = order.filter(t=>state[t]);
+ORDER.forEach(task=>{
+  if(params.get(task)==="1"){
+    done.push(task)
+  }
+})
 
-let filename;
+let filename = "none_done.png"
 
-if(done.length===0){
-  filename="none_done.png";
-}else if(done.length===5){
-  filename="all_done.png";
-}else{
-  filename=done.join("_")+"_done.png";
+if(done.length===1){
+  filename = `${done[0]}_done.png`
+}
+else if(done.length>=5){
+  filename = "all_done.png"
+}
+else if(done.length>1){
+  filename = `${done.join("_")}_done.png`
 }
 
-window.location.href = "/wallpapers/" + filename;
+document.getElementById("wallpaper").src =
+"/wallpapers/" + filename
 
 </script>
-</head>
-<body>
+
 </body>
 </html>
