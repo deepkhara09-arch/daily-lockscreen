@@ -2,84 +2,79 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Daily Tasks</title>
 
 <style>
 body{
   background:#0b0b0b;
   color:white;
-  font-family:-apple-system, BlinkMacSystemFont, system-ui;
-  margin:0;
-  padding:0;
+  font-family:system-ui;
+  text-align:center;
+  padding:40px 20px;
 }
 
 h1{
-  text-align:center;
-  font-size:32px;
-  margin:30px 0 25px;
-  letter-spacing:0.5px;
-}
-
-#list{
-  display:flex;
-  flex-direction:column;
-  gap:18px;
-  padding:0 18px 40px;
+  font-size:36px;
+  margin-bottom:30px;
 }
 
 button{
-  width:100%;
-  min-height:90px;
-  font-size:26px;
-  font-weight:600;
-  border-radius:22px;
+  width:90%;
+  max-width:400px;
+  padding:22px;
+  margin:12px auto;
+  font-size:22px;
+  border-radius:14px;
   border:none;
-  transition:0.15s ease;
+  display:block;
 }
 
-.todo{
-  background:#1f1f1f;
-  color:white;
-}
-
-.done{
-  background:#22c55e;
-  color:#0b0b0b;
-}
-
-button:active{
-  transform:scale(0.97);
-}
+.on{ background:#22c55e; color:black; }
+.off{ background:#222; color:white; }
 </style>
 </head>
 
 <body>
 
-<h1>Today's Non-Negotiables</h1>
+<h1>Today's Tasks</h1>
 
-<div id="list"></div>
+<div id="buttons"></div>
 
 <script>
-const tasks=["Workout","Study","Reading","Test","Mock Interview"];
-let state = JSON.parse(localStorage.getItem("state")) || {};
+const tasks=["workout","study","reading","test","mock"];
 
-function draw(){
-  const box=document.getElementById("list");
-  box.innerHTML="";
-  tasks.forEach(t=>{
-    const b=document.createElement("button");
-    b.textContent=t;
-    b.className=state[t]?"done":"todo";
-    b.onclick=()=>{
-      state[t]=!state[t];
-      localStorage.setItem("state",JSON.stringify(state));
-      draw();
-    };
-    box.appendChild(b);
+async function loadState(){
+  const res = await fetch("/state.json");
+  return await res.json();
+}
+
+async function saveState(state){
+  await fetch("/api/save",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify(state)
   });
 }
-draw();
+
+async function render(){
+  const state = await loadState();
+  const root=document.getElementById("buttons");
+  root.innerHTML="";
+
+  tasks.forEach(t=>{
+    const b=document.createElement("button");
+    b.textContent=t.toUpperCase();
+    b.className=state[t]?"on":"off";
+    b.onclick=async()=>{
+      state[t]=!state[t];
+      await saveState(state);
+      render();
+    };
+    root.appendChild(b);
+  });
+}
+
+render();
 </script>
 
 </body>
