@@ -13,7 +13,6 @@ body{
   font-family:-apple-system, BlinkMacSystemFont, system-ui;
   text-align:center;
   padding:30px 16px;
-  overflow-x:hidden;
 }
 
 h1{
@@ -21,8 +20,7 @@ h1{
   margin-bottom:26px;
 }
 
-/* ---------------- BUTTON BASE ---------------- */
-
+/* BASE BUTTON */
 button{
   width:100%;
   max-width:420px;
@@ -33,105 +31,25 @@ button{
   border-radius:22px;
   border:none;
   display:block;
-  transition:
-    transform 0.12s ease,
-    background 0.25s ease,
-    box-shadow 0.25s ease;
+
+  cursor:pointer;              /* 👈 IMPORTANT */
+  pointer-events:auto;         /* 👈 IMPORTANT */
+
+  transition:0.2s ease;
 }
 
-button:active{
-  transform:scale(0.96);
-}
-
+/* OFF */
 .off{
   background:#1f1f1f;
   color:white;
 }
 
-/* ---------------- ACTIVE COLORS ---------------- */
-
-.workout.on{
-  background:#22c55e;
-  color:black;
-  box-shadow:0 0 30px #22c55e;
-}
-
-.study.on{
-  background:#3b82f6;
-  color:white;
-  box-shadow:0 0 30px #3b82f6;
-}
-
-.reading.on{
-  background:#facc15;
-  color:black;
-  box-shadow:0 0 30px #facc15;
-}
-
-.test.on{
-  background:#ef4444;
-  color:white;
-  box-shadow:0 0 30px #ef4444;
-}
-
-.mock.on{
-  background:#f97316;
-  color:white;
-  box-shadow:0 0 30px #f97316;
-}
-
-/* ---------------- PULSE ---------------- */
-
-@keyframes pulse {
-  0%{transform:scale(1);}
-  50%{transform:scale(1.07);}
-  100%{transform:scale(1);}
-}
-
-.pulse{
-  animation:pulse 0.25s ease;
-}
-
-/* ---------------- CONFETTI ---------------- */
-
-.confetti{
-  position:fixed;
-  width:10px;
-  height:10px;
-  top:-10px;
-  animation:fall 1.2s linear forwards;
-  z-index:9999;
-}
-
-@keyframes fall{
-  to{
-    transform:translateY(120vh) rotate(720deg);
-    opacity:0;
-  }
-}
-
-/* ---------------- CELEBRATION OVERLAY ---------------- */
-
-#celebration{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.85);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  z-index:99999;
-}
-
-#celebration h2{
-  font-size:48px;
-  margin-bottom:10px;
-}
-
-#celebration p{
-  font-size:22px;
-  opacity:0.8;
-}
+/* ON COLORS */
+.workout.on{ background:#22c55e; color:black; }
+.study.on{ background:#3b82f6; color:white; }
+.reading.on{ background:#facc15; color:black; }
+.test.on{ background:#ef4444; color:white; }
+.mock.on{ background:#f97316; color:white; }
 </style>
 </head>
 
@@ -140,16 +58,12 @@ button:active{
 <h1>Today's Tasks</h1>
 <div id="buttons"></div>
 
-<div id="celebration">
-  <h2>🎉 YOU WON 🎉</h2>
-  <p>All tasks completed</p>
-</div>
-
 <script>
+
 const tasks=["workout","study","reading","test","mock"];
 
 async function loadState(){
-  const res = await fetch("/state.json");
+  const res = await fetch("/state.json",{cache:"no-store"});
   return await res.json();
 }
 
@@ -161,65 +75,30 @@ async function saveState(state){
   });
 }
 
-/* ---------- CONFETTI ---------- */
-
-function popConfetti(amount=20){
-  for(let i=0;i<amount;i++){
-    const c=document.createElement("div");
-    c.className="confetti";
-    c.style.left=Math.random()*100+"vw";
-    c.style.background=`hsl(${Math.random()*360},100%,60%)`;
-    c.style.animationDuration=(0.8+Math.random()*0.6)+"s";
-    document.body.appendChild(c);
-    setTimeout(()=>c.remove(),1500);
-  }
-}
-
-/* ---------- FULL CELEBRATION ---------- */
-
-function megaCelebration(){
-  const box=document.getElementById("celebration");
-  box.style.display="flex";
-  popConfetti(150);
-  setTimeout(()=>box.style.display="none",2000);
-}
-
-/* ---------- RENDER ---------- */
-
 async function render(){
-  const state=await loadState();
-  const root=document.getElementById("buttons");
-  root.innerHTML="";
-
-  const allDone = tasks.every(t=>state[t]);
+  const state = await loadState();
+  const root = document.getElementById("buttons");
+  root.innerHTML = "";
 
   tasks.forEach(task=>{
-    const btn=document.createElement("button");
-    btn.textContent=task.toUpperCase();
+    const btn = document.createElement("button");
+    btn.textContent = task.toUpperCase();
 
-    // 🔥 FIX: always include task name
+    // ALWAYS include task name
     btn.className = `${task} ${state[task] ? "on" : "off"}`;
 
-    btn.onclick=async()=>{
-      state[task]=!state[task];
+    btn.addEventListener("click", async ()=>{
+      state[task] = !state[task];
       await saveState(state);
-
-      btn.classList.add("pulse");
-      setTimeout(()=>btn.classList.remove("pulse"),250);
-
-      popConfetti(25);
       render();
-    };
+    });
 
     root.appendChild(btn);
   });
-
-  if(allDone){
-    megaCelebration();
-  }
 }
 
 render();
+
 </script>
 
 </body>
