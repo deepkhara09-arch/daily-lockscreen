@@ -13,7 +13,6 @@ body{
   font-family:-apple-system, BlinkMacSystemFont, system-ui;
   text-align:center;
   padding:30px 16px;
-  overflow:hidden;
 }
 
 h1{
@@ -88,7 +87,9 @@ button:active{
 
 const tasks=["workout","study","reading","test","mock"];
 
-let state={
+/* ---------- LOAD OR INIT STATE ---------- */
+
+let state = JSON.parse(localStorage.getItem("dailyState")) || {
   workout:false,
   study:false,
   reading:false,
@@ -96,25 +97,12 @@ let state={
   mock:false
 };
 
-// LOAD SAVED STATE
-fetch("/state.json",{cache:"no-store"})
-  .then(r=>r.json())
-  .then(data=>{
-    state=data;
-    render();
-  })
-  .catch(()=>render());
-
-// SAVE STATE
+/* ---------- SAVE ---------- */
 function saveState(){
-  fetch("/api/save",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify(state)
-  });
+  localStorage.setItem("dailyState", JSON.stringify(state));
 }
 
-// CONFETTI
+/* ---------- CONFETTI ---------- */
 function popConfetti(amount=25){
   for(let i=0;i<amount;i++){
     const c=document.createElement("div");
@@ -126,7 +114,7 @@ function popConfetti(amount=25){
   }
 }
 
-// RENDER
+/* ---------- RENDER ---------- */
 function render(){
   const root=document.getElementById("buttons");
   root.innerHTML="";
@@ -138,13 +126,12 @@ function render(){
 
     btn.onclick=()=>{
       state[task]=!state[task];
-      btn.className=`${task} ${state[task]?"on":"off"}`;
+      saveState();
 
+      btn.className=`${task} ${state[task]?"on":"off"}`;
       btn.classList.add("pulse");
       setTimeout(()=>btn.classList.remove("pulse"),250);
-
       popConfetti(25);
-      saveState();
     };
 
     root.appendChild(btn);
@@ -152,6 +139,18 @@ function render(){
 }
 
 render();
+
+/* ---------- AUTO RESET AT 6AM ---------- */
+const lastReset = localStorage.getItem("lastReset");
+const now = new Date();
+
+if(!lastReset || new Date(lastReset).toDateString() !== now.toDateString()){
+  if(now.getHours() >= 6){
+    localStorage.removeItem("dailyState");
+    localStorage.setItem("lastReset", now.toISOString());
+    location.reload();
+  }
+}
 
 </script>
 
