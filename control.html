@@ -65,7 +65,9 @@ function toggle(task){
   }else{
     params.set(task,"1")
   }
-  window.location.search=params.toString()
+  window.location.href =
+"/control.html?" + params.toString()
+localStorage.setItem("taskParams", params.toString())
 }
 
 render()
@@ -74,3 +76,4 @@ render()
 
 </body>
 </html>
+
