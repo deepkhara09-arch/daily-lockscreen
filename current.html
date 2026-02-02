@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Current Wallpaper</title>
+<script>
+
+const order=["workout","study","reading","test","mock"];
+
+const state = JSON.parse(localStorage.getItem("dailyState")) || {
+  workout:false,
+  study:false,
+  reading:false,
+  test:false,
+  mock:false
+};
+
+const done = order.filter(t=>state[t]);
+
+let filename;
+
+if(done.length===0){
+  filename="none_done.png";
+}else if(done.length===5){
+  filename="all_done.png";
+}else{
+  filename=done.join("_")+"_done.png";
+}
+
+window.location.href = "/wallpapers/" + filename;
+
+</script>
+</head>
+<body>
+</body>
+</html>
