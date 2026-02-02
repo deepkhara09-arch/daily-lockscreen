@@ -52,7 +52,7 @@ const TASKS = ["workout","study","reading","test","mock"]
 
 async function fetchState() {
   const res = await fetch(
-    SUPABASE_URL + "/rest/v1/state?select=*&limit=1",
+    SUPABASE_URL + "/rest/v1/state?select=*",
     {
       headers: {
         "apikey": ANON_KEY,
@@ -62,7 +62,13 @@ async function fetchState() {
   )
 
   const data = await res.json()
-  return data[0]
+  return data[0] || {
+    workout:false,
+    study:false,
+    reading:false,
+    test:false,
+    mock:false
+  }
 }
 
 async function render() {
@@ -77,19 +83,19 @@ async function render() {
 async function toggleTask(task) {
 
   const state = await fetchState()
+  state[task] = !state[task]
 
   await fetch(
-    SUPABASE_URL + "/rest/v1/state?id=eq.1",
+    SUPABASE_URL + "/rest/v1/state",
     {
-      method: "PATCH",
+      method: "POST",
       headers: {
         "apikey": ANON_KEY,
         "Authorization": "Bearer " + ANON_KEY,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Prefer": "resolution=merge-duplicates"
       },
-      body: JSON.stringify({
-        [task]: !state[task]
-      })
+      body: JSON.stringify(state)
     }
   )
 
@@ -101,7 +107,9 @@ render()
 </script>
 
 
+
 </body>
 </html>
+
 
 
