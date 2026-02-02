@@ -20,7 +20,7 @@ h1{
   margin-bottom:26px;
 }
 
-/* BASE BUTTON */
+/* BUTTON BASE */
 button{
   width:100%;
   max-width:420px;
@@ -31,10 +31,7 @@ button{
   border-radius:22px;
   border:none;
   display:block;
-
-  cursor:pointer;              /* 👈 IMPORTANT */
-  pointer-events:auto;         /* 👈 IMPORTANT */
-
+  cursor:pointer;
   transition:0.2s ease;
 }
 
@@ -62,36 +59,49 @@ button{
 
 const tasks=["workout","study","reading","test","mock"];
 
-async function loadState(){
-  const res = await fetch("/state.json",{cache:"no-store"});
-  return await res.json();
-}
+// local UI state (source of truth for colors)
+let state = {
+  workout:false,
+  study:false,
+  reading:false,
+  test:false,
+  mock:false
+};
 
-async function saveState(state){
-  await fetch("/api/save",{
+// load from server (best-effort)
+fetch("/state.json",{cache:"no-store"})
+  .then(r=>r.json())
+  .then(data=>{
+    state = data;
+    render();
+  })
+  .catch(()=>render());
+
+function saveState(){
+  fetch("/api/save",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify(state)
   });
 }
 
-async function render(){
-  const state = await loadState();
-  const root = document.getElementById("buttons");
-  root.innerHTML = "";
+function render(){
+  const root=document.getElementById("buttons");
+  root.innerHTML="";
 
   tasks.forEach(task=>{
-    const btn = document.createElement("button");
-    btn.textContent = task.toUpperCase();
-
-    // ALWAYS include task name
+    const btn=document.createElement("button");
+    btn.textContent=task.toUpperCase();
     btn.className = `${task} ${state[task] ? "on" : "off"}`;
 
-    btn.addEventListener("click", async ()=>{
-      state[task] = !state[task];
-      await saveState(state);
-      render();
-    });
+    btn.onclick=()=>{
+      // 🔥 instantly toggle locally
+      state[task]=!state[task];
+      btn.className = `${task} ${state[task] ? "on" : "off"}`;
+
+      // background save
+      saveState();
+    };
 
     root.appendChild(btn);
   });
