@@ -196,7 +196,9 @@ async function render(){
   tasks.forEach(task=>{
     const btn=document.createElement("button");
     btn.textContent=task.toUpperCase();
-    btn.className = state[task] ? `${task} on` : "off";
+
+    // 🔥 FIX: always include task name
+    btn.className = `${task} ${state[task] ? "on" : "off"}`;
 
     btn.onclick=async()=>{
       state[task]=!state[task];
