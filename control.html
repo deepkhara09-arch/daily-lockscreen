@@ -50,52 +50,42 @@ const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 
 const TASKS = ["workout","study","reading","test","mock"]
 
-async function fetchState() {
-  const res = await fetch(
+async function getState(){
+  const r = await fetch(
     SUPABASE_URL + "/rest/v1/state?select=*",
     {
-      headers: {
-        "apikey": ANON_KEY,
-        "Authorization": "Bearer " + ANON_KEY
+      headers:{
+        apikey: ANON_KEY,
+        Authorization: "Bearer " + ANON_KEY
       }
     }
   )
-
-  const data = await res.json()
-  return data[0] || {
-    workout:false,
-    study:false,
-    reading:false,
-    test:false,
-    mock:false
-  }
+  const d = await r.json()
+  return d[0]
 }
 
-async function render() {
-  const state = await fetchState()
-
-  TASKS.forEach(t => {
-    const btn = document.getElementById(t)
-    btn.className = state[t] ? "done" : "notdone"
+async function render(){
+  const s = await getState()
+  TASKS.forEach(t=>{
+    document.getElementById(t).className =
+      s[t] ? "done" : "notdone"
   })
 }
 
-async function toggleTask(task) {
-
-  const state = await fetchState()
-  state[task] = !state[task]
+async function toggleTask(task){
+  const s = await getState()
+  s[task] = !s[task]
 
   await fetch(
     SUPABASE_URL + "/rest/v1/state",
     {
-      method: "POST",
-      headers: {
-        "apikey": ANON_KEY,
-        "Authorization": "Bearer " + ANON_KEY,
-        "Content-Type": "application/json",
-        "Prefer": "resolution=merge-duplicates"
+      method:"PATCH",
+      headers:{
+        apikey: ANON_KEY,
+        Authorization: "Bearer " + ANON_KEY,
+        "Content-Type":"application/json"
       },
-      body: JSON.stringify(state)
+      body: JSON.stringify(s)
     }
   )
 
@@ -110,6 +100,7 @@ render()
 
 </body>
 </html>
+
 
 
 
