@@ -85,9 +85,11 @@ button:active{
 
 <script>
 
+/* ---------------- TASK LIST ---------------- */
+
 const tasks=["workout","study","reading","test","mock"];
 
-/* ---------- LOAD OR INIT STATE ---------- */
+/* ---------------- LOAD OR INIT STATE ---------------- */
 
 let state = JSON.parse(localStorage.getItem("dailyState")) || {
   workout:false,
@@ -97,12 +99,14 @@ let state = JSON.parse(localStorage.getItem("dailyState")) || {
   mock:false
 };
 
-/* ---------- SAVE ---------- */
+/* ---------------- SAVE STATE ---------------- */
+
 function saveState(){
   localStorage.setItem("dailyState", JSON.stringify(state));
 }
 
-/* ---------- CONFETTI ---------- */
+/* ---------------- CONFETTI ---------------- */
+
 function popConfetti(amount=25){
   for(let i=0;i<amount;i++){
     const c=document.createElement("div");
@@ -114,7 +118,31 @@ function popConfetti(amount=25){
   }
 }
 
-/* ---------- RENDER ---------- */
+/* ---------------- BUILD WALLPAPER NAME ---------------- */
+
+function getWallpaperName(){
+  const order=["workout","study","reading","test","mock"];
+  const done = order.filter(t=>state[t]);
+
+  if(done.length===0) return "none_done.png";
+  if(done.length===5) return "all_done.png";
+
+  return done.join("_") + "_done.png";
+}
+
+/* ---------------- HIDDEN IMAGE PREVIEW ---------------- */
+
+const img = document.createElement("img");
+img.style.display="none";
+img.id="currentWallpaper";
+document.body.appendChild(img);
+
+function updateWallpaperPreview(){
+  img.src = "/wallpapers/" + getWallpaperName();
+}
+
+/* ---------------- RENDER ---------------- */
+
 function render(){
   const root=document.getElementById("buttons");
   root.innerHTML="";
@@ -127,10 +155,12 @@ function render(){
     btn.onclick=()=>{
       state[task]=!state[task];
       saveState();
+      updateWallpaperPreview();
 
       btn.className=`${task} ${state[task]?"on":"off"}`;
       btn.classList.add("pulse");
       setTimeout(()=>btn.classList.remove("pulse"),250);
+
       popConfetti(25);
     };
 
@@ -139,8 +169,10 @@ function render(){
 }
 
 render();
+updateWallpaperPreview();
 
-/* ---------- AUTO RESET AT 6AM ---------- */
+/* ---------------- AUTO RESET AFTER 6AM ---------------- */
+
 const lastReset = localStorage.getItem("lastReset");
 const now = new Date();
 
