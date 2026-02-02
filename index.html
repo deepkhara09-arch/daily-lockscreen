@@ -89,6 +89,22 @@ button:active{
   }
 }
 
+/* ---------------- FIREWORK ---------------- */
+
+.firework{
+  position:fixed;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  animation:explode 1s ease-out forwards;
+  z-index:9999;
+}
+
+@keyframes explode{
+  0%{transform:scale(1); opacity:1;}
+  100%{transform:translate(var(--x),var(--y)) scale(0); opacity:0;}
+}
+
 /* ---------------- CELEBRATION OVERLAY ---------------- */
 
 #celebration{
@@ -103,15 +119,29 @@ button:active{
 }
 
 #celebration h2{
-  font-size:48px;
+  font-size:60px;
   margin-bottom:10px;
+  color:#22c55e;
+  text-shadow:0 0 25px #22c55e;
 }
 
 #celebration p{
-  font-size:22px;
-  opacity:0.8;
+  font-size:26px;
+  opacity:0.85;
 }
 
+/* Screen shake */
+@keyframes shake{
+  0%{transform:translate(0);}
+  25%{transform:translate(5px,5px);}
+  50%{transform:translate(-5px,-5px);}
+  75%{transform:translate(5px,-5px);}
+  100%{transform:translate(0);}
+}
+
+.shake{
+  animation:shake 0.4s;
+}
 </style>
 </head>
 
@@ -121,8 +151,8 @@ button:active{
 <div id="buttons"></div>
 
 <div id="celebration">
-  <h2>🎉 YOU DID IT 🎉</h2>
-  <p>All tasks completed</p>
+  <h2>🔥 KEEP IT UP 🔥</h2>
+  <p>You completed everything today</p>
 </div>
 
 <script>
@@ -131,7 +161,7 @@ const tasks=["workout","study","reading","test","mock"];
 
 /* ---------- LOCAL STATE ---------- */
 
-let state = {
+let state={
   workout:false,
   study:false,
   reading:false,
@@ -169,13 +199,36 @@ function popConfetti(amount=25){
   }
 }
 
+/* ---------- FIREWORKS ---------- */
+
+function fireworks(){
+  for(let i=0;i<80;i++){
+    const f=document.createElement("div");
+    f.className="firework";
+    f.style.left="50vw";
+    f.style.top="50vh";
+    f.style.background=`hsl(${Math.random()*360},100%,60%)`;
+    f.style.setProperty("--x",(Math.random()*600-300)+"px");
+    f.style.setProperty("--y",(Math.random()*600-300)+"px");
+    document.body.appendChild(f);
+    setTimeout(()=>f.remove(),1000);
+  }
+}
+
 /* ---------- BIG CELEBRATION ---------- */
 
 function megaCelebration(){
   const box=document.getElementById("celebration");
   box.style.display="flex";
+  document.body.classList.add("shake");
+
   popConfetti(200);
-  setTimeout(()=>box.style.display="none",2200);
+  fireworks();
+
+  setTimeout(()=>{
+    box.style.display="none";
+    document.body.classList.remove("shake");
+  },2500);
 }
 
 /* ---------- RENDER ---------- */
@@ -193,8 +246,8 @@ function render(){
 
     btn.onclick=()=>{
       state[task]=!state[task];
-
       btn.className = `${task} ${state[task]?"on":"off"}`;
+
       btn.classList.add("pulse");
       setTimeout(()=>btn.classList.remove("pulse"),250);
 
