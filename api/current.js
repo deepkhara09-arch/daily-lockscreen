@@ -1,7 +1,8 @@
 export default function handler(req, res) {
 
   const ORDER = ["workout","study","reading","test","mock"]
-  const q = req.query
+
+  let q = req.query
 
   let done = []
 
