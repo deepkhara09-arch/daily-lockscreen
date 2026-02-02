@@ -1,72 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Daily Checklist</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
 <style>
-
-html, body{
-  height:100%;
-}
-
 body{
   margin:0;
-  background:#0d0d0d;
+  min-height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  background:linear-gradient(180deg,#050505,#111);
   color:white;
-  font-family:-apple-system, BlinkMacSystemFont, sans-serif;
   display:flex;
   justify-content:center;
   align-items:center;
 }
 
-.app{
+.container{
   width:100%;
   max-width:420px;
-  padding:30px 22px;
-  box-sizing:border-box;
-  text-align:center;
+  padding:24px;
 }
 
 h1{
-  font-size:30px;
-  margin-bottom:35px;
+  text-align:center;
+  margin-bottom:30px;
+  font-size:28px;
+  letter-spacing:1px;
 }
 
 button{
   width:100%;
-  padding:26px;
+  padding:22px;
   margin:14px 0;
-  font-size:22px;
-  border-radius:22px;
+  font-size:20px;
+  border-radius:18px;
   border:none;
-  font-weight:600;
-  background:#1f1f1f;
+  background:#222;
   color:white;
-  transition:transform 0.08s ease, background 0.2s;
+  transition:all .15s ease;
 }
 
 button:active{
-  transform:scale(0.96);
+  transform:scale(0.97);
 }
 
 .done{
   background:#00e676;
   color:black;
+  box-shadow:0 0 20px rgba(0,230,118,.5);
 }
-
-.notdone{
-  background:#1f1f1f;
-}
-
 </style>
-
 </head>
 
 <body>
 
-<div class="app">
-
+<div class="container">
 <h1>Daily Checklist</h1>
 
 <button id="workout" onclick="toggleTask('workout')">Workout</button>
@@ -74,62 +64,74 @@ button:active{
 <button id="reading" onclick="toggleTask('reading')">Reading</button>
 <button id="test" onclick="toggleTask('test')">Test</button>
 <button id="mock" onclick="toggleTask('mock')">Mock Interview</button>
-
 </div>
 
+<!-- Confetti Library -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <script>
+const API =
+"https://vgirktwcmamfjnjbqndn.supabase.co/rest/v1/state?id=eq.1"
 
-const SUPABASE_URL = "https://vgirktwcmamfjnjbqndn.supabase.co"
-const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnaXJrdHdjbWFtZmpuamJxbmRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMzU0OTYsImV4cCI6MjA4NTYxMTQ5Nn0.StAPWo-nEvMnUwet8-f8BXmQZdSFn-UGVGwDHFNvlLM"
+const API_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnaXJrdHdjbWFtZmpuamJxbmRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMzU0OTYsImV4cCI6MjA4NTYxMTQ5Nn0.StAPWo-nEvMnUwet8-f8BXmQZdSFn-UGVGwDHFNvlLM"
 
-const TASKS = ["workout","study","reading","test","mock"]
-
-async function getState(){
-  const r = await fetch(
-    SUPABASE_URL + "/rest/v1/state?id=eq.1",
-    {
-      headers:{
-        apikey: ANON_KEY,
-        Authorization: "Bearer " + ANON_KEY
-      }
-    }
-  )
-  const d = await r.json()
-  return d[0]
+let state = {
+  workout:false,
+  study:false,
+  reading:false,
+  test:false,
+  mock:false
 }
 
-async function render(){
-  const s = await getState()
-  TASKS.forEach(t=>{
-    document.getElementById(t).className =
-      s[t] ? "done" : "notdone"
+// Load current state
+fetch(API,{
+  headers:{
+    apikey:API_KEY,
+    Authorization:"Bearer "+API_KEY
+  }
+})
+.then(r=>r.json())
+.then(data=>{
+  state = data[0]
+  render()
+})
+
+function render(){
+  for(const t in state){
+    const btn=document.getElementById(t)
+    if(state[t]) btn.classList.add("done")
+    else btn.classList.remove("done")
+  }
+}
+
+// Instant UI + backend sync
+function toggleTask(task){
+
+  // Toggle locally first (instant feel)
+  state[task]=!state[task]
+  render()
+
+  // Confetti if turned ON
+  if(state[task]){
+    confetti({
+      particleCount:120,
+      spread:70,
+      origin:{y:0.2}
+    })
+  }
+
+  // Send to backend quietly
+  fetch(API,{
+    method:"PATCH",
+    headers:{
+      apikey:API_KEY,
+      Authorization:"Bearer "+API_KEY,
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({[task]:state[task]})
   })
 }
-
-async function toggleTask(task){
-  const s = await getState()
-  s[task] = !s[task]
-
-  await fetch(
-    SUPABASE_URL + "/rest/v1/state?id=eq.1",
-    {
-      method:"PATCH",
-      headers:{
-        apikey: ANON_KEY,
-        Authorization: "Bearer " + ANON_KEY,
-        "Content-Type":"application/json"
-      },
-      body: JSON.stringify({
-        [task]: s[task]
-      })
-    }
-  )
-
-  render()
-}
-
-render()
-
 </script>
 
 </body>
