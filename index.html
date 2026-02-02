@@ -2,35 +2,96 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Daily Tasks</title>
 
 <style>
 body{
   background:#0b0b0b;
   color:white;
-  font-family:system-ui;
+  font-family:-apple-system, BlinkMacSystemFont, system-ui;
   text-align:center;
-  padding:40px 20px;
+  padding:30px 16px;
 }
 
+/* ---------- HEADER ---------- */
 h1{
-  font-size:36px;
-  margin-bottom:30px;
+  font-size:32px;
+  margin-bottom:28px;
+  letter-spacing:0.5px;
 }
 
+/* ---------- BUTTON BASE ---------- */
 button{
-  width:90%;
-  max-width:400px;
-  padding:22px;
-  margin:12px auto;
-  font-size:22px;
-  border-radius:14px;
+  width:100%;
+  max-width:420px;
+  min-height:90px;
+  margin:14px auto;
+  font-size:26px;
+  font-weight:700;
+  border-radius:22px;
   border:none;
   display:block;
+  transition: 
+    transform 0.12s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
-.on{ background:#22c55e; color:black; }
-.off{ background:#222; color:white; }
+/* Press effect */
+button:active{
+  transform:scale(0.96);
+}
+
+/* ---------- OFF STATE ---------- */
+.off{
+  background:#1f1f1f;
+  color:white;
+  box-shadow:none;
+}
+
+/* ---------- ON STATES (COLORS) ---------- */
+.workout.on{
+  background:#22c55e;
+  color:black;
+  box-shadow:0 0 25px #22c55e;
+}
+
+.study.on{
+  background:#3b82f6;
+  color:white;
+  box-shadow:0 0 25px #3b82f6;
+}
+
+.reading.on{
+  background:#facc15;
+  color:black;
+  box-shadow:0 0 25px #facc15;
+}
+
+.test.on{
+  background:#ef4444;
+  color:white;
+  box-shadow:0 0 25px #ef4444;
+}
+
+.mock.on{
+  background:#f97316;
+  color:white;
+  box-shadow:0 0 25px #f97316;
+}
+
+/* ---------- PULSE ANIMATION ---------- */
+@keyframes pulse {
+  0% { transform:scale(1); }
+  50% { transform:scale(1.05); }
+  100% { transform:scale(1); }
+}
+
+.pulse{
+  animation:pulse 0.25s ease;
+}
 </style>
 </head>
 
@@ -52,7 +113,7 @@ async function saveState(state){
   await fetch("/api/save",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify(state)
+    body: JSON.stringify(state)
   });
 }
 
@@ -61,16 +122,23 @@ async function render(){
   const root=document.getElementById("buttons");
   root.innerHTML="";
 
-  tasks.forEach(t=>{
-    const b=document.createElement("button");
-    b.textContent=t.toUpperCase();
-    b.className=state[t]?"on":"off";
-    b.onclick=async()=>{
-      state[t]=!state[t];
+  tasks.forEach(task=>{
+    const btn=document.createElement("button");
+    btn.textContent=task.toUpperCase();
+    btn.className = state[task] ? `${task} on` : "off";
+
+    btn.onclick=async()=>{
+      state[task]=!state[task];
       await saveState(state);
+
+      // add pulse animation
+      btn.classList.add("pulse");
+      setTimeout(()=>btn.classList.remove("pulse"),250);
+
       render();
     };
-    root.appendChild(b);
+
+    root.appendChild(btn);
   });
 }
 
