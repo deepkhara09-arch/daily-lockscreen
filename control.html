@@ -37,21 +37,39 @@ button{
 
 <h1>Daily Checklist</h1>
 
-<button id="workout" onclick="toggle('workout')">Workout</button>
-<button id="study" onclick="toggle('study')">Study</button>
-<button id="reading" onclick="toggle('reading')">Reading</button>
-<button id="test" onclick="toggle('test')">Test</button>
-<button id="mock" onclick="toggle('mock')">Mock</button>
+<button id="workout" onclick="toggleTask('workout')">Workout</button>
+<button id="study" onclick="toggleTask('study')">Study</button>
+<button id="reading" onclick="toggleTask('reading')">Reading</button>
+<button id="test" onclick="toggleTask('test')">Test</button>
+<button id="mock" onclick="toggleTask('mock')">Mock</button>
 
 <script>
 
-const TASKS=["workout","study","reading","test","mock"]
-const params=new URLSearchParams(window.location.search)
+const SUPABASE_URL = "https://vgirktwcmamfjnjbqndn.supabase.co"
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnaXJrdHdjbWFtZmpuamJxbmRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMzU0OTYsImV4cCI6MjA4NTYxMTQ5Nn0.StAPWo-nEvMnUwet8-f8BXmQZdSFn-UGVGwDHFNvlLM"
 
-function render(){
+const TASKS=["workout","study","reading","test","mock"]
+
+async function fetchState(){
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/state?select=*`,
+    {
+      headers:{
+        "apikey": ANON_KEY
+      }
+    }
+  )
+
+  const data = await res.json()
+  return data[0]
+}
+
+async function render(){
+  const state = await fetchState()
+
   TASKS.forEach(t=>{
     const btn=document.getElementById(t)
-    if(params.get(t)==="1"){
+    if(state[t]){
       btn.className="done"
     }else{
       btn.className="notdone"
@@ -59,15 +77,25 @@ function render(){
   })
 }
 
-function toggle(task){
-  if(params.get(task)==="1"){
-    params.set(task,"0")
-  }else{
-    params.set(task,"1")
-  }
-  window.location.href =
-"/control.html?" + params.toString()
-localStorage.setItem("taskParams", params.toString())
+async function toggleTask(task){
+
+  const state = await fetchState()
+
+  await fetch(
+    `${SUPABASE_URL}/rest/v1/state`,
+    {
+      method:"PATCH",
+      headers:{
+        "apikey": ANON_KEY,
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify({
+        [task]: !state[task]
+      })
+    }
+  )
+
+  render()
 }
 
 render()
@@ -76,4 +104,3 @@ render()
 
 </body>
 </html>
-
