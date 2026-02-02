@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Daily Checklist</title>
+
+<style>
+body{
+  font-family:sans-serif;
+  background:#111;
+  color:white;
+  text-align:center;
+}
+
+button{
+  width:80%;
+  padding:20px;
+  margin:10px;
+  font-size:20px;
+  border-radius:12px;
+  border:none;
+}
+
+.done{
+  background:#00c853;
+  color:black;
+}
+
+.notdone{
+  background:#333;
+  color:white;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Daily Checklist</h1>
+
+<button id="workout" onclick="toggle('workout')">Workout</button>
+<button id="study" onclick="toggle('study')">Study</button>
+<button id="reading" onclick="toggle('reading')">Reading</button>
+<button id="test" onclick="toggle('test')">Test</button>
+<button id="mock" onclick="toggle('mock')">Mock</button>
+
+<script>
+
+const TASKS=["workout","study","reading","test","mock"]
+const params=new URLSearchParams(window.location.search)
+
+function render(){
+  TASKS.forEach(t=>{
+    const btn=document.getElementById(t)
+    if(params.get(t)==="1"){
+      btn.className="done"
+    }else{
+      btn.className="notdone"
+    }
+  })
+}
+
+function toggle(task){
+  if(params.get(task)==="1"){
+    params.set(task,"0")
+  }else{
+    params.set(task,"1")
+  }
+  window.location.search=params.toString()
+}
+
+render()
+
+</script>
+
+</body>
+</html>
